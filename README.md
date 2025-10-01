@@ -45,7 +45,7 @@ cd interactive_frontend_work_req_1
 
 4. Run server and open the link:
 ```bash
- npm run dev in the terminal
+ npm run dev
   ```
 http://localhost:5173/
 
