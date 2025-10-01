@@ -14,7 +14,6 @@ import {
 import "./index.css";
 import "./App.css";
 
-/* ----------------------------- Types ------------------------------ */
 
 type IntroCardProps = {
   name: string;
@@ -25,7 +24,6 @@ type IntroCardProps = {
 
 type FunFact = { text: string };
 
-/* -------------------------- Helper utils -------------------------- */
 
 function getRandomIndex(max: number, exclude?: number) {
   if (max <= 1) return 0;
@@ -35,8 +33,6 @@ function getRandomIndex(max: number, exclude?: number) {
   }
   return idx;
 }
-
-/* -------------------------- UI Components ------------------------- */
 
 function FancyTitle({ text }: { text: string }) {
   return (
@@ -64,8 +60,6 @@ function IntroCard({ name, funFact, darkMode, avatarUrl }: IntroCardProps) {
       <FancyTitle text={`°❀.ೃ࿔*Hello, My name is ${name}!°❀.ೃ࿔*`} />
 
       {darkMode ? (
-        // key={funFact} re-mounts this node on every change so any CSS
-        // animation you apply to .funfact will replay.
         <p className="muted funfact" key={funFact}>
           Fun fact: {funFact}
         </p>
@@ -107,7 +101,6 @@ function AboutPanel() {
 }
 
 function LinksPanel() {
-  // links intentionally left generic
   return (
     <section className="card stack center" style={{ ["--delay" as any]: "240ms" }}>
       <h2 className="h2">Find me</h2>
@@ -129,23 +122,18 @@ function LinksPanel() {
   );
 }
 
-/* ------------------------------ App ------------------------------- */
 
 export default function App() {
   const [dark, setDark] = useState(false);
-
-  // fun facts state
   const [facts, setFacts] = useState<FunFact[]>([]);
   const [currentIdx, setCurrentIdx] = useState(0);
   const [loadingFacts, setLoadingFacts] = useState(true);
   const [factsError, setFactsError] = useState<string | null>(null);
 
-  // Apply dark mode class to <html>
   useEffect(() => {
     document.documentElement.classList.toggle("dark", dark);
   }, [dark]);
 
-  // Load fun facts once from /funfacts.json (in public/)
   useEffect(() => {
     let cancelled = false;
 
@@ -157,7 +145,6 @@ export default function App() {
 
         if (!cancelled) {
           const list = data.funFacts ?? [];
-          // Provide a tiny fallback if file is empty
           setFacts(
             list.length
               ? list
@@ -169,7 +156,6 @@ export default function App() {
       } catch (e: unknown) {
         if (!cancelled) {
           setFactsError(e instanceof Error ? e.message : "Unknown error");
-          // Non-fatal fallback so the app still demonstrates behavior
           setFacts([{ text: "Could not load funfacts.json (using fallback)." }]);
           setLoadingFacts(false);
         }
@@ -182,7 +168,6 @@ export default function App() {
     };
   }, []);
 
-  // Rotate to a new random fun fact every 2 seconds
   useEffect(() => {
     if (loadingFacts || facts.length === 0) return;
     const id = setInterval(() => {
