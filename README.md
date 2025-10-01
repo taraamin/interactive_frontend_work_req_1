@@ -1,6 +1,10 @@
 
-My introduction app #2:
-This is my React + Typescript application project built with Vite. The application displays information about me like my name, random funfacts (that i reveal in dark mode) loaded from a local JSON file that displays every two seconds,and a bit more. i added some animation to make the app a bit more fun and not so static.
+# Random Fun Fact Viewer
+
+This project builds on **Work Requirement 1** from the `main` branch.  
+The `interactive_frontend_work_req_2` branch contains the Random Fun Fact Viewer app:
+
+This is my React + Typescript application project built with Vite. The application displays information about me like my name, random funfacts (that i reveal in dark mode) loaded from a local JSON file that displays every two seconds,and a bit more. I added some animation to make the app a bit more fun and not so static.
 
 What you need to run the application:
 
@@ -20,20 +24,22 @@ The funfacts are stored in public/funfacts.json
 Step by step:
 
 1. Clone my repository, run this in your terminal:
+```bash
 git clone https://github.com/taraamin/interactive_frontend_work_req_1.git
 cd interactive_frontend_work_req_1
-
-2. install the dependencies :
-
-```bash
-npm install
 ```
 
-3. Run the app:
- Clone the repository:
-   ```bash
-   git clone https://github.com/taraamin/interactive_frontend_work_req_2.git
-   cd interactive_frontend_work_req_2
+2. Switch to Work requirement 2 branch :
+
+```bash
+ git checkout interactive_frontend_work_req_2
+```
+
+3. Install dependencies:
+  run this in your terminal:
+  npm install
+    
+ 
 
 4. Run server and open the link:
  npm run dev in the terminal
