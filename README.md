@@ -37,13 +37,18 @@ cd interactive_frontend_work_req_1
 
 3. Install dependencies:
   run this in your terminal:
+```bash
   npm install
+   ```
     
  
 
 4. Run server and open the link:
+```bash
  npm run dev in the terminal
+  ```
 http://localhost:5173/
+
 
 
 Application features:
