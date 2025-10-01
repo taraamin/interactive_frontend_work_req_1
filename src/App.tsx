@@ -14,6 +14,8 @@ import {
 import "./index.css";
 import "./App.css";
 
+/* ----------------------------- Types ------------------------------ */
+
 type IntroCardProps = {
   name: string;
   funFact: string;
@@ -21,12 +23,30 @@ type IntroCardProps = {
   avatarUrl: string;
 };
 
-function FancyTitle({ text }: { text: string }) {
+type FunFact = { text: string };
 
+/* -------------------------- Helper utils -------------------------- */
+
+function getRandomIndex(max: number, exclude?: number) {
+  if (max <= 1) return 0;
+  let idx = Math.floor(Math.random() * max);
+  while (idx === exclude) {
+    idx = Math.floor(Math.random() * max);
+  }
+  return idx;
+}
+
+/* -------------------------- UI Components ------------------------- */
+
+function FancyTitle({ text }: { text: string }) {
   return (
     <h1 className="title">
       {text.split("").map((ch, i) => (
-        <span className="char" style={{ ["--i" as any]: i } as React.CSSProperties} key={i}>
+        <span
+          className="char"
+          style={{ ["--i" as any]: i } as React.CSSProperties}
+          key={i}
+        >
           {ch === " " ? "\u00A0" : ch}
         </span>
       ))}
@@ -44,9 +64,13 @@ function IntroCard({ name, funFact, darkMode, avatarUrl }: IntroCardProps) {
       <FancyTitle text={`°❀.ೃ࿔*Hello, My name is ${name}!°❀.ೃ࿔*`} />
 
       {darkMode ? (
-        <p className="muted funfact">Fun fact: {funFact}</p>
+        // key={funFact} re-mounts this node on every change so any CSS
+        // animation you apply to .funfact will replay.
+        <p className="muted funfact" key={funFact}>
+          Fun fact: {funFact}
+        </p>
       ) : (
-        <p className="muted">Switch to dark mode to reveal my fun fact ⏾⋆.˚</p>
+        <p className="muted">Switch to dark mode to reveal my fun facts ⏾⋆.˚</p>
       )}
     </section>
   );
@@ -83,30 +107,20 @@ function AboutPanel() {
 }
 
 function LinksPanel() {
-   // I put the links empty on purpose btw
+  // links intentionally left generic
   return (
     <section className="card stack center" style={{ ["--delay" as any]: "240ms" }}>
       <h2 className="h2">Find me</h2>
       <div className="links">
-        <a href="mailto:hello@example.com" className="link"> 
+        <a href="mailto:hello@example.com" className="link">
           <Mail className="icon" />
           Email
-        </a> 
-        <a
-          href="https://github.com"
-          target="_blank"
-          rel="noreferrer"
-          className="link"
-        >
+        </a>
+        <a href="https://github.com" target="_blank" rel="noreferrer" className="link">
           <Github className="icon" />
           GitHub
         </a>
-        <a
-          href="https://linkedin.com"
-          target="_blank"
-          rel="noreferrer"
-          className="link"
-        >
+        <a href="https://linkedin.com" target="_blank" rel="noreferrer" className="link">
           <Linkedin className="icon" />
           LinkedIn
         </a>
@@ -115,12 +129,69 @@ function LinksPanel() {
   );
 }
 
+/* ------------------------------ App ------------------------------- */
+
 export default function App() {
   const [dark, setDark] = useState(false);
 
+  // fun facts state
+  const [facts, setFacts] = useState<FunFact[]>([]);
+  const [currentIdx, setCurrentIdx] = useState(0);
+  const [loadingFacts, setLoadingFacts] = useState(true);
+  const [factsError, setFactsError] = useState<string | null>(null);
+
+  // Apply dark mode class to <html>
   useEffect(() => {
     document.documentElement.classList.toggle("dark", dark);
   }, [dark]);
+
+  // Load fun facts once from /funfacts.json (in public/)
+  useEffect(() => {
+    let cancelled = false;
+
+    async function load() {
+      try {
+        const res = await fetch("/funfacts.json", { cache: "no-store" });
+        if (!res.ok) throw new Error(`Failed to load funfacts.json (${res.status})`);
+        const data = (await res.json()) as { funFacts?: FunFact[] };
+
+        if (!cancelled) {
+          const list = data.funFacts ?? [];
+          // Provide a tiny fallback if file is empty
+          setFacts(
+            list.length
+              ? list
+              : [{ text: "Add your fun facts to /public/funfacts.json 🎉" }]
+          );
+          setCurrentIdx(0);
+          setLoadingFacts(false);
+        }
+      } catch (e: unknown) {
+        if (!cancelled) {
+          setFactsError(e instanceof Error ? e.message : "Unknown error");
+          // Non-fatal fallback so the app still demonstrates behavior
+          setFacts([{ text: "Could not load funfacts.json (using fallback)." }]);
+          setLoadingFacts(false);
+        }
+      }
+    }
+
+    load();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  // Rotate to a new random fun fact every 2 seconds
+  useEffect(() => {
+    if (loadingFacts || facts.length === 0) return;
+    const id = setInterval(() => {
+      setCurrentIdx((prev) => getRandomIndex(facts.length, prev));
+    }, 2000);
+    return () => clearInterval(id);
+  }, [facts.length, loadingFacts]);
+
+  const currentFact = facts[currentIdx]?.text ?? "";
 
   return (
     <div className="page">
@@ -138,15 +209,23 @@ export default function App() {
       <main className="container">
         <IntroCard
           name="Tara"
-          funFact="I drink way too much coffee ☕︎"
+          funFact={
+            loadingFacts
+              ? "Loading fun facts…"
+              : factsError
+              ? `Error: ${factsError}`
+              : currentFact
+          }
           darkMode={dark}
-          avatarUrl="/img/profilep.png" 
+          avatarUrl="/img/profilep.png"
         />
         <AboutPanel />
         <LinksPanel />
       </main>
 
-      <footer className="footer">© {new Date().getFullYear()} • Introduction App</footer>
+      <footer className="footer">
+        © {new Date().getFullYear()} • Random Fun Fact Viewer
+      </footer>
     </div>
   );
 }
